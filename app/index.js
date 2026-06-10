@@ -1,520 +1,507 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  Image,
-  FlatList,
-  ScrollView,
-  Animated,
-} from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, ImageBackground, ScrollView, Platform, Image } from "react-native";
+import { useRouter } from "expo-router";
 
-// IMAGENS DE ROSTO
-import rostoGuerreiro from "../assets/rostos/c_guerreiro.png";
-import rostoGuerreira from "../assets/rostos/c_guerreira.png";
-import rostoFeiticeiro from "../assets/rostos/c_feiticeiro.png";
-import rostoArqueira from "../assets/rostos/c_arqueira.png";
-import rostoCorujo from "../assets/rostos/c_corujo.png";
-import rostoKing from "../assets/rostos/c_king.png";
-import rostoPirata from "../assets/rostos/c_pirata.png";
+// Certifique-se de que os nomes dos arquivos estão exatamente assim na sua pasta assets
+import mapaFundo from "../assets/mapa_fundo.jpg";
+import pindaImg from "../assets/pinda.jpg";
+import joiaImg from "../assets/joia.jpg"; 
+import tefitImg from "../assets/tefit.jpg"; 
+import rei_corImg from "../assets/rei_cor.jpg"; 
 
-// PERSONAGENS
-import guerreiro from "../assets/guerreiro.png";
-import guerreira from "../assets/guerreira.png";
-import feiticeiro from "../assets/feiticeiro.png";
-import arqueira from "../assets/arqueira.png";
-import corujo from "../assets/corujo.png";
-import king from "../assets/king.png";
-import pirata from "../assets/pirata.png";
+export default function Inicio() {
+  const router = useRouter();
 
-// NOVAS IMAGENS
-import fundoTaverna from "../assets/taverna.png";
-import sapo from "../assets/sapo.png";
-import c_sapo from "../assets/rostos/c_sapo.png";
-
-const personagens = [
-  {
-    id: 1,
-    nome: "Ragnar, o Escudo de Ferro",
-    imagem: guerreiro,
-    icone: rostoGuerreiro,
-    info: {
-      descricao:
-        "Ragnar, o Escudo de Ferro, carrega o peso de mil batalhas em seu machado. Abandonou seu posto de guarda real após uma traição e agora busca redenção nos confins do reino, defendendo os fracos em troca de hidromel e um lugar quente para dormir. Sua lealdade agora é apenas aos oprimidos.",
-    },
-  },
-  {
-    id: 2,
-    nome: "Lyanna, a Lâmina Carmesim",
-    imagem: guerreira,
-    icone: rostoGuerreira,
-    info: {
-      descricao:
-        "Nascida em um clã de caçadores nas montanhas, Lyanna é a última de sua linhagem. Seus golpes rápidos e acrobáticos buscam vingança contra a criatura que destruiu sua casa. Ela é uma força da natureza, movida por uma fúria controlada e a sede de justiça.",
-    },
-  },
-  {
-    id: 3,
-    nome: "Azerion, o Arcanista Perdido",
-    imagem: feiticeiro,
-    icone: rostoFeiticeiro,
-    info: { descricao: "Um estudioso recluso que abriu acidentalmente um portal para o Vazio. Agora, atormentado por visões, ele usa feitiços devastadores para selar a fenda que criou. Sua mente é um campo de batalha, e sua magia, um mal necessário." },
-  },
-  {
-    id: 4,
-    nome: "Eridian, a Flecha Fantasma",
-    imagem: arqueira,
-    icone: rostoArqueira,
-    info: { descricao: "Eridian é uma elfa da floresta, conhecida por sua precisão sobrenatural. Ela protege as trilhas antigas e seus aliados, movendo-se como um fantasma entre as árvores. Sua flecha nunca erra, e seu silêncio é sua maior arma." },
-  },
-  {
-    id: 5,
-    nome: "Corujo, o Guardião da Luz",
-    imagem: corujo,
-    icone: rostoCorujo,
-    info: { descricao: "Um ser celestial enviado para guiar os aventureiros. Corujo usa o poder da luz para curar e fortalecer seus companheiros. Embora não seja um lutador, sua presença traz esperança e invoca bênçãos protetoras sobre a equipe." },
-  },
-  {
-    id: 6,
-    nome: "Brutus King, o Punho do Caos",
-    imagem: king,
-    icone: rostoKing,
-    info: { descricao: "Brutus é um ex-gladiador que trocou a arena pela estrada. Ele busca constantemente o próximo grande desafio, usando pura força física e agressividade em combate. Sua lenda é escrita em cicatrizes e punhos cerrados." },
-  },
-  {
-    id: 7,
-    nome: "Drax, o Pirata das Sombras",
-    imagem: pirata,
-    icone: rostoPirata,
-    info: { descricao: "Um mestre da furtividade e veneno. Drax é um pirata sem bandeira, buscando tesouros antigos e segredos. Ele se move na escuridão, e o último som que seus inimigos ouvem é o assobio silencioso de sua lâmina envenenada." },
-  },
-];
-
-export default function Page() {
-  const [selecionado, setSelecionado] = useState(personagens[0]);
-  const [tela, setTela] = useState("selecao");
-
-  // ---- ANIMAÇÃO FADE-IN ----
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const fadePersonagem = useRef(new Animated.Value(0)).current;
-
-  // === FALAS DOS PERSONAGENS ===
-const falasPorPersonagem = {
-  sapo:
-    "Ora, ora… seja muito bem-vindo, viajante. Eu sou o Mestre Sapo, guardião destas histórias e observador dos caminhos que se cruzam nesta taverna perdida no tempo.",
-
-  "Ragnar, o Escudo de Ferro":
-    "Hmph… esta taverna tem cheiro de paz. Faz tempo que não sinto algo assim. Descanse enquanto pode, viajante. A estrada cobra caro dos fortes… e devora os fracos.",
-
-  "Lyanna, a Lâmina Carmesim":
-   "Não estou aqui para beber. Estou atrás de rastros… qualquer pista da criatura que destruiu meu clã. Se souber de algo, fale. Se não… não atrapalhe.",
-
-  "Azerion, o Arcanista Perdido":
-   "As paredes desta taverna… elas sussurram. Ouço ecos do Vazio até aqui. Se algo começar a se contorcer no canto da sua visão… respire fundo. É normal. Para mim, pelo menos.",
-
-  "Eridian, a Flecha Fantasma":
-    "Estas chamas… este ruído… tão diferentes da serenidade das florestas. Mas fico aqui por um instante. Até o vento me chamar novamente.",
-
-  "Corujo, o Guardião da Luz":
-     "Ah, viajante… a luz brilha diferente em você. Seja forte. Toda jornada começa com um pequeno passo — e uma grande coragem.",
-
-  "Brutus King, o Punho do Caos":
-    "HAHA! Uma taverna! Finalmente um lugar que não cai quando eu encosto na parede! Se alguém quiser briga, estou aceitando — só por aquecimento.",
-
-  "Drax, o Pirata das Sombras":
-    "Lugares como este escondem mais segredos que cofres afundados. Olhe bem… às vezes o tesouro está onde ninguém pensa em procurar.",
-};
-
-// Estado do diálogo
-const [fala, setFala] = useState("Toque para ouvir o personagem.");
-
-function proximaFala() {
-  if (falasPorPersonagem[selecionado.nome]) {
-    setFala(falasPorPersonagem[selecionado.nome]);
-  } else {
-    setFala("...");
-  }
-}
-
-
- useEffect(() => {
-  if (tela === "taverna") {
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-
-    Animated.timing(fadePersonagem, {
-      toValue: 1,
-      duration: 800,
-      useNativeDriver: true,
-    }).start();
-  }
-}, [tela]);
-
-  // === TELA TAVERNA ===
-if (tela === "taverna") {
-  // Personagens que NÃO podem virar
-const personagensFixos = ["Lyanna, a Lâmina Carmesim", "Azerion, o Arcanista Perdido", "Eridian, a Flecha Fantasma", "Corujo, o Guardião da Luz"];
   return (
-    <View style={styles.tavernaContainer}>
+    <View style={styles.containerMaster}>
+      
+      {/* ================= BARRA SUPERIOR (APENAS WEB) ================= */}
+      {Platform.OS === 'web' && (
+        <View style={styles.headerOriginal}>
+          <View style={styles.logoBox}>
+            <Text style={styles.logoText}>
+              MOONVEIL <Text style={styles.logoSub}>CODEX</Text>
+            </Text>
+          </View>
+          
+          <View style={styles.menuLinks}>
+            <TouchableOpacity onPress={() => router.push("/")} style={[styles.menuItem, styles.menuItemAtivo]}>
+              <Text style={styles.menuItemTextAtivo}>Início</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/mundo")} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Mundo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/personagens")} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Personagens</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/bestiario")} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>Bestiário</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/historia")} style={styles.menuItem}>
+              <Text style={styles.menuItemText}>História</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      )}
 
-      {/* Fundo */}
-      <Image source={fundoTaverna} style={styles.bgTaverna} />
+      <ScrollView style={styles.scrollMain} contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+        
+        {/* SEÇÃO 1: HERO BANNER (APRESENTAÇÃO INICIAL COMPLETA) */}
+        <View style={styles.heroWrapper}>
+          <ImageBackground 
+            source={mapaFundo} 
+            style={styles.backgroundImage} 
+            imageStyle={styles.imageBackgroundStyle}
+          >
+            <View style={styles.overlayFiltro}>
+              <View style={styles.heroCenter}>
+                
+                {Platform.OS !== 'web' && (
+                  <Text style={styles.mobileLogoBrand}>LEGENDS OF MOONVEIL</Text>
+                )}
 
-      {/* --- SCROLL SEM QUEBRAR O POSICIONAMENTO --- */}
-      <ScrollView
-  contentContainerStyle={styles.tavernaScroll}
-  showsVerticalScrollIndicator={false}
->
-        <Animated.View
-          style={[styles.tavernaConteudo, { opacity: fadeAnim }]}
-        >
-          {/* Avatar + Nome do personagem */}
-          <View style={styles.tavernaHeader}>
-            <Image source={c_sapo} style={styles.tavernaAvatar} />
-            <Text style={styles.tavernaNome}>Mestre Sapo</Text>
+                <Text style={styles.subtituloOuro}>O CODEX OFICIAL DA SAGA</Text>
+                
+                <Text style={styles.tituloPrincipal}>
+                  Legends of{"\n"}
+                  <Text style={styles.tituloSub}>MoonVeil</Text>
+                </Text>
+
+                {/* Introdução aprimorada baseada nas novas informações */}
+                <Text style={styles.paragrafoDescricao}>
+                  A quebra do selo da <Text style={styles.textRed}>Joia da Alma Carmesim</Text> lançou os reinos em corrupção absoluta. Parta ao lado de <Text style={styles.boldWhite}>Pinda</Text>, um elfo tímido da floresta de Protage, em uma jornada solitária para subjugar as trevas, conquistar os poderes elementares e restaurar a paz em MoonVeil.
+                </Text>
+
+                <View style={styles.containerBotoes}>
+                  <TouchableOpacity style={styles.botaoLaranja} onPress={() => router.push("/historia")}>
+                    <Text style={styles.textoBotaoLaranja}>Ler a História  →</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity style={styles.botaoTransparente} onPress={() => router.push("/mundo")}>
+                    <Text style={styles.textoBotaoTransparente}>Explorar o Mundo</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </ImageBackground>
+
+          <View style={styles.fadeSuaveMobileWeb} />
+        </View>
+
+        {/* SEÇÃO 2: CARD GRID DE NAVEGAÇÃO RÁPIDA */}
+        <View style={styles.secaoPreta}>
+          <View style={styles.gridCategorias}>
+            <TouchableOpacity style={styles.cardCategoria} onPress={() => router.push("/mundo")}>
+              <Text style={styles.iconeCard}>🗺️</Text>
+              <Text style={styles.tituloCard}>Mundo</Text>
+              <Text style={styles.descCard}>4 reinos para explorar</Text>
+              <Text style={styles.linkCard}>4 entradas →</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardCategoria} onPress={() => router.push("/personagens")}>
+              <Text style={styles.iconeCard}>👥</Text>
+              <Text style={styles.tituloCard}>Personagens</Text>
+              <Text style={styles.descCard}>Heróis, chefes e vilões</Text>
+              <Text style={styles.linkCard}>8 entradas →</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardCategoria} onPress={() => router.push("/bestiario")}>
+              <Text style={styles.iconeCard}>💀</Text>
+              <Text style={styles.tituloCard}>Bestiário</Text>
+              <Text style={styles.descCard}>Criaturas das trevas</Text>
+              <Text style={styles.linkCard}>12 entradas →</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.cardCategoria} onPress={() => router.push("/historia")}>
+              <Text style={styles.iconeCard}>📜</Text>
+              <Text style={styles.tituloCard}>História</Text>
+              <Text style={styles.descCard}>A saga completa</Text>
+              <Text style={styles.linkCard}>12 entradas →</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* SEÇÃO 3: FIGURAS DA SAGA */}
+        <View style={styles.secaoFiguras}>
+          <View style={styles.headerSecaoFlex}>
+            <View style={styles.headerTextGroup}>
+              <Text style={styles.subtituloOuroLeft}>EM DESTAQUE</Text>
+              <Text style={styles.tituloSecaoBranco}>Figuras da Saga</Text>
+            </View>
+            <TouchableOpacity onPress={() => router.push("/personagens")} style={styles.botaoVerTodosContainer}>
+              <Text style={styles.linkVerTodos}>Ver todos →</Text>
+            </TouchableOpacity>
           </View>
 
-          <Text style={styles.tavernaHistoria}>
-            Ora, ora… seja muito bem-vindo, viajante! Eu sou conhecido por estas
-            bandas como **Mestre Sapo**, o guardião das histórias e observador das
-            almas valentes que cruzam esta porta.
-            {"\n\n"}
-            Esta taverna existe desde os primeiros pixels deste reino. Suas
-            paredes já testemunharam batalhas, romances proibidos, artefatos
-            misteriosos e planos grandiosos que mudaram o destino de muitos.
-            {"\n\n"}
-            Heróis costumam descansar por aqui antes de iniciarem sua jornada.
-            Alguns chegam feridos, outros famintos… mas todos saem com um
-            propósito renovado.
-            {"\n\n"}
-            Sinta-se à vontade. Tome um lugar, respire fundo e aproveite este
-            momento — sua aventura está prestes a ganhar vida.
+          <View style={styles.gridFiguras}>
+            <View style={styles.cardFiguraItem}>
+              <View style={styles.containerFotoFigura}>
+                <Image source={pindaImg} style={styles.fotoFiguraStyle} />
+              </View>
+              <View style={styles.tagBadgeHeroi}><Text style={styles.tagBadgeText}>HERÓI</Text></View>
+              <Text style={styles.tituloFiguraName}>Pinda</Text>
+              <Text style={styles.subFiguraRole}>O Herói dos Reinos</Text>
+            </View>
+
+            <View style={styles.cardFiguraItem}>
+              <View style={styles.containerFotoFigura}>
+                <Image source={tefitImg} style={styles.fotoFiguraStyle} />
+              </View>
+              <View style={styles.tagBadgeAliado}><Text style={styles.tagBadgeText}>ALIADO</Text></View>
+              <Text style={styles.tituloFiguraName}>Tefit</Text>
+              <Text style={styles.subFiguraRole}>A Guardiã da Floresta</Text>
+            </View>
+
+            <View style={styles.cardFiguraItem}>
+              <View style={styles.containerFotoFigura}>
+                <Image source={rei_corImg} style={styles.fotoFiguraStyle} />
+              </View>
+              <View style={styles.tagBadgeVilao}><Text style={styles.tagBadgeText}>VILÃO</Text></View>
+              <Text style={styles.tituloFiguraName}>A Velha Cigana</Text>
+              <Text style={styles.subFiguraRole}>Portadora da Joia</Text>
+            </View>
+
+            <View style={styles.cardFiguraItem}>
+              <View style={styles.containerFotoFigura}>
+                <Image source={joiaImg} style={styles.fotoFiguraStyle} />
+              </View>
+              <View style={styles.tagBadgeArtefato}><Text style={styles.tagBadgeText}>ARTEFATO</Text></View>
+              <Text style={styles.tituloFiguraName}>Joia da Alma</Text>
+              <Text style={styles.subFiguraRole}>Artefato das Trevas</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* SEÇÃO 4: CONQUISTAS */}
+        <View style={styles.secaoPoderes}>
+          <View style={styles.containerBordaPoderes}>
+            <Text style={styles.subtituloOuroLeft}>CONQUISTAS DE PINDA</Text>
+            <Text style={styles.tituloSecaoBrancoMargin}>Os Poderes do Herói</Text>
+
+            <View style={styles.gridPoderesBox}>
+              <View style={styles.cardPoderInner}>
+                <Text style={[styles.iconPoderColor, { color: "#4facfe" }]}>💧</Text>
+                <Text style={styles.tituloPoderText}>Poder da Água</Text>
+                <Text style={styles.subInfoPoder}>PÂNTANO DE DOUG</Text>
+                <Text style={styles.descPoderText}>Domínio sobre as águas obtido após libertar o Rei Waler da corrupção.</Text>
+              </View>
+
+              <View style={styles.cardPoderInner}>
+                <Text style={[styles.iconPoderColor, { color: "#ff8c00" }]}>🔥</Text>
+                <Text style={styles.tituloPoderText}>Poder do Fogo</Text>
+                <Text style={styles.subInfoPoder}>REINO DE LAVA</Text>
+                <Text style={styles.descPoderText}>Chamas elementares arrancadas do vulcão após subjugar o Rei Flamo.</Text>
+              </View>
+
+              <View style={styles.cardPoderInner}>
+                <Text style={[styles.iconPoderColor, { color: "#00ff87" }]}>🌱</Text>
+                <Text style={styles.tituloPoderText}>Braço de Vinhas</Text>
+                <Text style={styles.subInfoPoder}>FLORESTA DE PROTAGE</Text>
+                <Text style={styles.descPoderText}>Prótese viva dada por Tefit após Pinda sacrificar seu membro para libertá-la.</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        {/* SEÇÃO 5: RODAPÉ */}
+        <View style={styles.footerLayout}>
+          <Text style={styles.footerLogo}>⚔️ LEGENDS OF MOONVEIL</Text>
+          <Text style={styles.footerText}>
+            Uma biblioteca dedicada à saga de Pinda, o herói dos reinos. Explore o universo, os personagens e os segredos da lendária Joia da Alma Carmesim.
           </Text>
+        </View>
 
-          {/* Diálogo dos personagens */}
-<TouchableOpacity onPress={proximaFala} style={styles.dialogoBox}>
-  <Text style={styles.dialogoTexto}>{fala}</Text>
-</TouchableOpacity>
-
-
-          <TouchableOpacity
-            style={styles.botaoVoltar}
-            onPress={() => setTela("selecao")}
-          >
-            <Text
-              style={{
-                color: "white",
-                fontFamily: "PixelBold",
-                fontSize: 20,
-              }}
-            >
-              Voltar
-            </Text>
-          </TouchableOpacity>
-        </Animated.View>
       </ScrollView>
-
-      {/* Sapo fundo */}
-      <Animated.Image
-        source={sapo}
-        style={[styles.sapo, { opacity: fadeAnim }]}
-      />
-
-      {/* PERSONAGEM ESCOLHIDO — atrás do container, com fade-in */}
-<Animated.Image
-  source={selecionado.imagem}
-  style={[
-    personagensFixos.includes(selecionado.nome)
-      ? styles.personagemTavernaFixo
-      : styles.personagemTaverna,
-    { opacity: fadePersonagem }
-  ]}
-/>
-
     </View>
   );
 }
 
-  // === TELA DE SELEÇÃO ===
-  return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Seleção de Personagem</Text>
-
-      <FlatList
-        data={personagens}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingVertical: 10 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={[
-              styles.cardHorizontal,
-              selecionado.id === item.id && styles.cardAtivo,
-            ]}
-            onPress={() => setSelecionado(item)}
-          >
-            <Image source={item.icone} style={styles.cardImgHorizontal} />
-          </TouchableOpacity>
-        )}
-      />
-
-      {/* Preview */}
-      <View style={styles.preview}>
-        <View style={styles.previewBox}>
-          <Image source={selecionado.imagem} style={styles.previewImg} />
-        </View>
-
-        <Text style={styles.previewNome}>{selecionado.nome}</Text>
-
-        <View style={styles.infoBox}>
-          <Text style={styles.sinopseTitulo}>História</Text>
-          <Text style={styles.sinopseTexto}>{selecionado.info.descricao}</Text>
-        </View>
-
-        <TouchableOpacity style={styles.botaoSelecionar} onPress={() => setTela("taverna")}>
-          <Text style={{ color: "black", fontSize: 22, fontFamily: "PixelBold" }}>
-            Entrar na Taverna
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
-  );
-}
-
-// ================= ESTILOS =================
-
 const styles = StyleSheet.create({
-  container: {
+  containerMaster: {
     flex: 1,
-    backgroundColor: "#0d0d0f",
-    paddingBottom: 35,
+    backgroundColor: "#0b0907",
   },
-
-  title: {
-  fontSize: 35,
-  fontFamily: "PixelBold",
-  color: "#fff",
-  textAlign: "center",
-  marginBottom: 25,
-  letterSpacing: 2,
-  borderBottomWidth: 3,
-  borderColor: "#e5c07b",
-  paddingBottom: 8,
-  marginTop: 15,
-},
-
-  cardHorizontal: {
-    width: 110,
-    height: 110,
-    marginRight: 12,
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: "#141416",
-    borderWidth: 3,
-    borderColor: "transparent",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  cardImgHorizontal: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
-  },
-
-  cardAtivo: {
-    borderColor: "#e5c07b",
-  },
-
-  preview: {
-    marginTop: 20,
-    alignItems: "center",
-  },
-
-  previewBox: {
-    width: "90%",
-    height: 300,
-    backgroundColor: "#1a1a1c",
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 4,
-    borderColor: "#e5c07b",
-  },
-
-  previewImg: {
-    width: "85%",
-    height: "85%",
-    resizeMode: "contain",
-  },
-
-  previewNome: {
-  marginTop: 15,
-  color: "#fff",
-  fontSize: 30,
-  fontFamily: "PixelBold",
-  textAlign: "center",
-  letterSpacing: 1,
-},
-
-  infoBox: {
-    marginTop: 20,
-    width: "90%",
-    padding: 15,
-    backgroundColor: "#121214",
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: "#e5c07b",
-  },
-
-  sinopseTitulo: {
-    fontSize: 22,
-    color: "#e5c07b",
-    fontFamily: "PixelBold",
-    marginBottom: 10,
-    textAlign: "center",
-  },
-
-  sinopseTexto: {
-    fontSize: 16,
-    color: "#dcdcdc",
-    fontFamily: "PixelMedium",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-
-  botaoSelecionar: {
-    marginTop: 25,
-    backgroundColor: "#e5c07b",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
-  },
-
-  // ===== TELA DA TAVERNA =====
-  tavernaScroll: {
-  paddingVertical: 60,  // espaçamento em cima e embaixo
-  alignItems: "center",
-  width: "100%",        // impede conteúdo de expandir errado
-},
-
-  tavernaContainer: {
+  scrollMain: {
     flex: 1,
-    justifyContent: "center",
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
+  headerOriginal: {
+    width: "100%",
+    height: 75,
+    backgroundColor: "#0b0907",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: "8%",
+    borderBottomWidth: 1,
+    borderColor: "rgba(229, 192, 123, 0.04)",
+    zIndex: 100,
+  },
+  logoBox: {
+    flexDirection: "row",
     alignItems: "center",
   },
-
-  bgTaverna: {
-    position: "absolute",
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
-  },
-
-  tavernaConteudo: {
-  width: "85%",
-  backgroundColor: "rgba(0,0,0,0.55)",
-  padding: 22,
-  borderRadius: 15,
-  borderWidth: 3,
-  borderColor: "#e5c07b",
-},
-
-  tavernaHeader: {
-  flexDirection: "row",
-  alignItems: "center",
-  marginBottom: 12,
-},
-
-tavernaAvatar: {
-  width: 45,
-  height: 45,
-  resizeMode: "contain",
-  marginRight: 10,
-},
-
-tavernaNome: {
-  fontSize: 26,
-  color: "#e5c07b",
-  fontFamily: "PixelBold",
-},
-
-  tavernaTitulo: {
-    fontSize: 40,
-    color: "white",
-    fontFamily: "PixelBold",
-    textAlign: "center",
-    marginBottom: 15,
-  },
-
-  tavernaHistoria: {
-    color: "#f0e4c3",
+  logoText: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    fontWeight: "700",
     fontSize: 18,
-    textAlign: "center",
-    lineHeight: 26,
-    fontFamily: "PixelMedium",
+    color: "#e5c07b",
+    letterSpacing: 1.5,
   },
-
-  sapo: {
+  logoSub: {
+    color: "#7e7063",
+    fontSize: 11,
+    fontWeight: "400",
+    marginLeft: 3,
+  },
+  menuLinks: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 32,
+  },
+  menuItem: {
+    paddingVertical: 6,
+  },
+  menuItemAtivo: {
+    borderBottomWidth: 1.5,
+    borderBottomColor: "#e5c07b",
+  },
+  menuItemText: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    color: "#7e7063",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  menuItemTextAtivo: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    color: "#e5c07b",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  heroWrapper: {
+    position: "relative",
+    width: "100%",
+    backgroundColor: "#0b0907",
+  },
+  backgroundImage: {
+    width: "100%",
+    height: Platform.OS === 'web' ? "calc(100vh - 75px)" : 580, 
+    minHeight: 540,
+  },
+  imageBackgroundStyle: {
+    objectFit: "cover",
+    objectPosition: "center 30%",
+  },
+  overlayFiltro: {
+    flex: 1,
+    backgroundColor: "rgba(11, 9, 7, 0.52)", 
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 40,
+    paddingTop: Platform.OS === 'web' ? 40 : 80, 
+  },
+  fadeSuaveMobileWeb: {
     position: "absolute",
-    bottom: 10,
-    right: -80,
-    width: 250,
-    height: 150,
-    resizeMode: "contain",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 160, 
+    ...Platform.select({
+      web: {
+        backgroundImage: "linear-gradient(to bottom, transparent 0%, rgba(11, 9, 7, 0.6) 40%, rgba(11, 9, 7, 0.9) 80%, #0b0907 100%)",
+      },
+      default: {
+        backgroundColor: "transparent",
+        borderBottomWidth: 90,
+        borderBottomColor: "#0b0907",
+        opacity: 0.95,
+      }
+    })
   },
-
-  personagemTaverna: {
-  position: "absolute",
-  bottom: 10,
-  left: -80,       // espelho da posição do sapo
-  width: 250,
-  height: 150,
-  resizeMode: "contain",
-  transform: [{ scaleX: -1 }], // faz o personagem olhar para o centro
+  mobileLogoBrand: {
+    color: "#e5c07b",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 3,
+    marginBottom: 20,
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
   },
-
-  personagemTavernaFixo: {
-  position: "absolute",
-  bottom: 10,
-  left: -40,
-  width: 220,
-  height: 150,
-  resizeMode: "contain",
-  transform: [{ scaleX: 1 }], // não vira
-},
-
-  botaoVoltar: {
-    marginTop: 22,
-    backgroundColor: "#5a4737",
-    paddingVertical: 12,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: "#e5c07b",
+  heroCenter: {
+    width: "90%",
+    maxWidth: 820,
+    alignItems: "center",
+    zIndex: 5,
+  },
+  subtituloOuro: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    fontWeight: "600",
+    fontSize: 11,
+    color: "#e5c07b",
+    letterSpacing: 5,
+    marginBottom: 16,
+    textAlign: "center",
+  },
+  tituloPrincipal: {
+    fontFamily: Platform.OS === 'web' ? "'Cinzel', serif" : "System",
+    fontWeight: "700",
+    fontSize: Platform.OS === 'web' ? 64 : 36, 
+    color: "#fff",
+    textAlign: "center",
+    lineHeight: Platform.OS === 'web' ? 74 : 44,
+    marginBottom: 20,
+  },
+  tituloSub: {
+    color: "#dfa46a", // O nome "MoonVeil" ganha destaque na cor cobre/ouro
+  },
+  paragrafoDescricao: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    fontWeight: "400",
+    fontSize: Platform.OS === 'web' ? 16 : 14,
+    color: "#a4968a",
+    textAlign: "center",
+    lineHeight: 24,
+    marginBottom: 35,
+    maxWidth: 680,
+  },
+  boldWhite: {
+    fontWeight: "600",
+    color: "#fff",
+  },
+  textRed: {
+    color: "#ff4444",
+    fontWeight: "600",
+  },
+  containerBotoes: {
+    flexDirection: "row",
+    gap: 14,
+    justifyContent: "center",
+    alignItems: "center",
+    flexWrap: "wrap",
+  },
+  botaoLaranja: {
+    backgroundColor: "#dfa46a",
+    paddingVertical: 13,
+    paddingHorizontal: 26,
+    borderRadius: 6,
+  },
+  textoBotaoLaranja: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    fontWeight: "700",
+    color: "#0b0907",
+    fontSize: 14,
+  },
+  botaoTransparente: {
+    backgroundColor: "rgba(19, 16, 13, 0.5)",
+    paddingVertical: 13,
+    paddingHorizontal: 26,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.12)",
+  },
+  textoBotaoTransparente: {
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System",
+    fontWeight: "600",
+    color: "#fff",
+    fontSize: 14,
+  },
+  secaoPreta: {
+    width: "100%",
+    backgroundColor: "#0b0907",
+    alignItems: "center",
+    paddingVertical: 30,
+  },
+  gridCategorias: {
+    width: "88%",
+    maxWidth: 1100,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 16,
+    justifyContent: "center",
+  },
+  cardCategoria: {
+    flex: 1,
+    minWidth: 240,
+    backgroundColor: "#13100d",
+    borderRadius: 8,
+    padding: 22,
+    borderWidth: 1,
+    borderColor: "rgba(229, 192, 123, 0.03)",
+  },
+  iconeCard: { fontSize: 22, marginBottom: 14 },
+  tituloCard: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#fff", fontSize: 17, fontWeight: "600", marginBottom: 4 },
+  descCard: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#7e7063", fontSize: 13, marginBottom: 16 },
+  linkCard: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#dfa46a", fontSize: 13, fontWeight: "500" },
+  secaoFiguras: { 
+    width: "100%", 
+    backgroundColor: "#0b0907", 
+    alignItems: "center", 
+    paddingBottom: 60 
+  },
+  headerSecaoFlex: { 
+    width: "88%", 
+    maxWidth: 1100, 
+    flexDirection: "row", 
+    justifyContent: "space-between", 
+    alignItems: "center", 
+    marginBottom: 30,
+    flexWrap: "wrap", 
+    gap: 10
+  },
+  headerTextGroup: {
+    flexDirection: "column",
+  },
+  botaoVerTodosContainer: {
+    paddingVertical: 6,
+    paddingHorizontal: 4,
+  },
+  subtituloOuroLeft: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#e5c07b", fontSize: 11, fontWeight: "600", letterSpacing: 3, marginBottom: 6 },
+  tituloSecaoBranco: { fontFamily: Platform.OS === 'web' ? "'Cinzel', serif" : "System", color: "#fff", fontSize: Platform.OS === 'web' ? 28 : 24, fontWeight: "700" },
+  tituloSecaoBrancoMargin: { fontFamily: Platform.OS === 'web' ? "'Cinzel', serif" : "System", color: "#fff", fontSize: Platform.OS === 'web' ? 28 : 24, fontWeight: "700", marginBottom: 25 },
+  linkVerTodos: { 
+    fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", 
+    color: "#dfa46a", 
+    fontSize: 13,
+    fontWeight: "500"
+  },
+  gridFiguras: { width: "88%", maxWidth: 1100, flexDirection: "row", flexWrap: "wrap", gap: 16, justifyContent: "center" },
+  cardFiguraItem: { flex: 1, minWidth: 220, backgroundColor: "#13100d", borderRadius: 8, padding: 14 },
+  
+  containerFotoFigura: {
+    width: "100%",
+    height: 400,
+    backgroundColor: "#1a1612",
+    borderRadius: 6,
+    overflow: "hidden", 
+    marginBottom: 14,
+    justifyContent: "center",
     alignItems: "center",
   },
+  fotoFiguraStyle: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover", 
+  },
+  emojiImgFallback: {
+    fontSize: 38,
+  },
 
-  dialogoBox: {
-  marginTop: 20,
-  backgroundColor: "rgba(0,0,0,0.6)",
-  padding: 16,
-  width: "100%",
-  borderRadius: 12,
-  borderWidth: 2,
-  borderColor: "#e5c07b",
-},
-
-dialogoTexto: {
-  color: "#fff",
-  fontSize: 16,
-  fontFamily: "PixelMedium",
-  textAlign: "center",
-  lineHeight: 22,
-},
-
+  tagBadgeHeroi: { backgroundColor: "rgba(229, 192, 123, 0.15)", paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginBottom: 10, alignSelf: 'flex-start' },
+  tagBadgeAliado: { backgroundColor: "rgba(79, 172, 254, 0.15)", paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginBottom: 10, alignSelf: 'flex-start' },
+  tagBadgeVilao: { backgroundColor: "rgba(255, 68, 68, 0.15)", paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginBottom: 10, alignSelf: 'flex-start' },
+  tagBadgeArtefato: { backgroundColor: "rgba(0, 255, 135, 0.15)", paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginBottom: 10, alignSelf: 'flex-start' },
+  tagBadgeText: { color: "#fff", fontSize: 9, fontWeight: "700" },
+  tituloFiguraName: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#fff", fontSize: 17, fontWeight: "600", marginBottom: 2 },
+  subFiguraRole: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#7e7063", fontSize: 12 },
+  secaoPoderes: { width: "100%", backgroundColor: "#0b0907", alignItems: "center", paddingBottom: 60 },
+  containerBordaPoderes: { width: "88%", maxWidth: 1100, padding: 25, borderRadius: 12, borderWidth: 1, borderColor: "rgba(229, 192, 123, 0.08)", backgroundColor: "#0e0c0a" },
+  gridPoderesBox: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+  cardPoderInner: { flex: 1, minWidth: 240, backgroundColor: "#13100d", borderRadius: 8, padding: 20 },
+  iconPoderColor: { fontSize: 24, marginBottom: 12 },
+  tituloPoderText: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#fff", fontSize: 17, fontWeight: "600", marginBottom: 2 },
+  subInfoPoder: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#e5c07b", fontSize: 10, fontWeight: "600", marginBottom: 10 },
+  descPoderText: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#908276", fontSize: 13, lineHeight: 20 },
+  footerLayout: { width: "100%", backgroundColor: "#0b0907", alignItems: "center", paddingVertical: 50, borderTopWidth: 1, borderColor: "rgba(255, 255, 255, 0.03)" },
+  footerLogo: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#fff", fontSize: 14, fontWeight: "600", marginBottom: 10 },
+  footerText: { fontFamily: Platform.OS === 'web' ? "'Montserrat', sans-serif" : "System", color: "#61564d", fontSize: 12, textAlign: "center", maxWidth: 550, lineHeight: 20, paddingHorizontal: 20 },
 });
